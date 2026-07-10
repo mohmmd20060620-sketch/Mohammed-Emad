@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - سبأ سنتر</title>
+    <style>
+        :root {
+            --primary-bg: #1a237e; /* الأزرق الغامق الخلفية */
+            --card-bg: #ffffff;
+            --btn-gold: #c5a059; /* اللون الذهبي للزر */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--primary-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--primary-bg);
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline-color: var(--btn-gold);
+            text-align: center;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--btn-gold);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: #b08d4a;
+            transform: translateY(-2px);
+        }
+
+        .error-msg {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none; /* مخفي افتراضياً */
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .footer-links a {
+            color: var(--primary-bg);
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>تسجيل الدخول</h2>
+        
+        <div class="input-group">
+            <input type="text" id="username" placeholder="اسم المستخدم">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="password" placeholder="كلمة المرور">
+        </div>
+
+        <button class="btn-login" onclick="checkLogin()">دخول</button>
+
+        <div id="error" class="error-msg">⚠️ خطأ في اسم المستخدم أو كلمة المرور</div>
+
+        <div class="footer-links">
+            ليس لديك حساب؟ <a href="register.html">إنشاء حساب</a>
+        </div>
+    </div>
+
+    <script>
+        function checkLogin() {
+            // الحصول على القيم المدخلة
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+
+            // البيانات الصحيحة (يجب كتابة الأرقام بالإنجليزية 1234)
+            if (user === "admin" && pass === "1234") {
+                
+                // إخفاء رسالة الخطأ إذا كانت ظاهرة
+                errorDiv.style.display = "none";
+                
+                // الانتقال لصفحة التسديد (تأكد أن الملف موجود بنفس الاسم)
+                window.location.href = "payment.html";
+                
+            } else {
+                // إظهار رسالة الخطأ في حال كانت البيانات غلط
+                errorDiv.style.display = "block";
+            }
+        }
+
+        // إضافة ميزة تسجيل الدخول عند الضغط على زر Enter في لوحة المفاتيح
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkLogin();
+            }
+        });
+    </script>
+
+</body>
+</html>

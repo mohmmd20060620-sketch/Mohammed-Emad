@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>واجهة سبأ التفاعلية</title>
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #c5a059;
+            --bg-light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background-color: #dfe6e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            width: 95%;
+            max-width: 900px;
+            background-color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 50px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #283593 100%);
+            color: rgb(234, 233, 239);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary-color);
+        }
+
+        /* تنسيق الروابط لتبدو كأزرار تفاعلية */
+        .login-actions {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .login-action-item {
+            text-decoration: none; /* إزالة الخط تحت الرابط */
+            color: white;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .login-action-item:hover {
+            transform: scale(1.1); /* تكبير بسيط عند التمرير */
+            color: var(--secondary-color);
+        }
+
+        .login-action-item img {
+            width: 45px;
+            margin-bottom: 5px;
+        }
+
+        /* جعل البطاقات قابلة للضغط */
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 30px;
+        }
+
+        @media (min-width: 600px) {
+            .icons-grid { grid-template-columns: repeat(6, 1fr); }
+        }
+
+        .icon-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .icon-card {
+            background-color: white;
+            padding: 15px 10px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #eee;
+            transition: 0.3s;
+        }
+
+        .icon-card:hover {
+            background-color: var(--bg-light);
+            border-color: var(--secondary-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .icon-card img { width: 35px; margin-bottom: 10px; }
+        .icon-card-title { font-size: 13px; font-weight: bold; }
+
+        .footer-notice {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 12px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="header">
+            <h1 style="margin-bottom: 25px;">سبأ سنتر للدفع الاكتروني</h1>
+            
+            <div class="login-actions">
+                <a href="login.html" class="login-action-item">
+                    <img src="https://img.icons8.com/fluency/48/key.png" alt="دخول">
+                    <div>دخول</div>
+                </a>
+
+                <a href="register.html" class="login-action-item">
+                    <img src="https://img.icons8.com/fluency/48/edit-user-female.png" alt="تسجيل">
+                    <div>تسجيل</div>
+                </a>
+
+                <a href="news.html" class="login-action-item">
+                    <img src="https://img.icons8.com/fluency/48/bullhorn.png" alt="إعلانات">
+                    <div>إعلانات</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="icons-grid">
+            <a href="privacy.html" class="icon-link">
+                <div class="icon-card">
+                    <img src="https://img.icons8.com/fluency/48/shield.png">
+                    <div class="icon-card-title">الخصوصية</div>
+                </div>
+            </a>
+
+            <a href="transfer.html" class="icon-link">
+                <div class="icon-card">
+                    <img src="https://img.icons8.com/fluency/48/money-transfer.png">
+                    <div class="icon-card-title">التحويل</div>
+                </div>
+            </a>
+
+            <a href="download.html" class="icon-link">
+                <div class="icon-card">
+                    <img src="https://img.icons8.com/fluency/48/download-from-cloud.png">
+                    <div class="icon-card-title">التطبيق</div>
+                </div>
+            </a>
+
+            <a href="contact.html" class="icon-link">
+                <div class="icon-card">
+                    <img src="https://img.icons8.com/fluency/48/phone.png">
+                    <div class="icon-card-title">تواصل</div>
+                </div>
+            </a>
+
+            <a href="terms.html" class="icon-link">
+                <div class="icon-card">
+                    <img src="https://img.icons8.com/fluency/48/list.png">
+                    <div class="icon-card-title">الشروط</div>
+                </div>
+            </a>
+
+            <a href="help.html" class="icon-link">
+                <div class="icon-card">
+                    <img src="https://img.icons8.com/fluency/48/info.png">
+                    <div class="icon-card-title">تعليمات</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="footer-notice">
+            <div class="notice-text">📢 اضغط على "دخول" للوصول لحسابك</div>
+        </div>
+    </div>
+
+</body>
+</html>
