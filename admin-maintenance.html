@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>صيانة البيانات | إتقان برو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg-body: #f1f5f9;
+            --card-bg: #ffffff;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .maintenance-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: #eef2ff;
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 20px;
+        }
+
+        h2 { color: #1e293b; margin-bottom: 10px; }
+        p { color: #64748b; margin-bottom: 30px; font-size: 0.95rem; }
+
+        .action-section {
+            border: 2px dashed #e2e8f0;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        .action-section:hover { border-color: var(--primary); }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .btn-export { background: var(--success); color: white; margin-bottom: 15px; }
+        .btn-export:hover { background: #059669; transform: translateY(-2px); }
+
+        .btn-import { background: var(--primary); color: white; }
+        .btn-import:hover { background: #4338ca; transform: translateY(-2px); }
+
+        #restoreFile { display: none; }
+
+        .file-label {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="maintenance-card">
+    <div class="icon-box">
+        <i class="fas fa-shield-halved"></i>
+    </div>
+    <h2>صيانة وأمان البيانات</h2>
+    <p>يمكنك تصدير نسخة احتياطية من بيانات النظام أو استعادتها في حالة الطوارئ.</p>
+
+    <div class="action-section">
+        <button class="btn btn-export" onclick="exportData()">
+            <i class="fas fa-download"></i> تصدير نسخة احتياطية (JSON)
+        </button>
+        <small style="color: #94a3b8;">يتم حفظ الملف في مجلد التنزيلات</small>
+    </div>
+
+    <div class="action-section">
+        <button class="btn btn-import" onclick="document.getElementById('restoreFile').click()">
+            <i class="fas fa-upload"></i> استيراد نسخة احتياطية
+        </button>
+        <input type="file" id="restoreFile" accept=".json" onchange="handleRestore(event)">
+        <span class="file-label">اختر ملف النسخة الاحتياطية</span>
+    </div>
+
+    <a href="system-admin.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+</div>
+
+<script src="database.js"></script>
+<script>
+    // دالة تصدير البيانات
+    function exportData() {
+        if (typeof DB !== 'undefined') {
+            const data = DB.exportBackup(); // استدعاء دالة التصدير من قاعدة بياناتك
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `EtqanPro_Backup_${new Date().toLocaleDateString()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            alert("✅ تم تصدير النسخة الاحتياطية بنجاح");
+        }
+    }
+
+    // دالة معالجة الاستيراد
+    function handleRestore(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (confirm("تحذير: استيراد البيانات سيؤدي لاستبدال كافة البيانات الحالية. هل أنت متأكد؟")) {
+                    if (typeof DB !== 'undefined' && DB.importBackup) {
+                        DB.importBackup(data); // استدعاء دالة الاستيراد من قاعدة بياناتك
+                        alert("✅ تم استعادة البيانات بنجاح! سيتم إعادة تحميل الصفحة.");
+                        window.location.reload();
+                    }
+                }
+            } catch (err) {
+                alert("❌ خطأ: الملف المختار غير صالح.");
+            }
+        };
+        reader.readAsText(file);
+    }
+</script>
+
+</body>
+</html>

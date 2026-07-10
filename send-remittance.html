@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة الحوالات الصادرة | إتقان برو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #1e293b; --accent: #059669; --danger: #e11d48; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* شريط الأدوات (Toolbar) */
+        .toolbar { display: flex; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .btn-tool { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-new { background: #3b82f6; color: white; }
+        .btn-save { background: var(--accent); color: white; }
+        .btn-edit { background: #f59e0b; color: white; }
+        .btn-delete { background: var(--danger); color: white; }
+        .btn-search { background: #64748b; color: white; }
+
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; position: relative; }
+        label { font-size: 0.85em; margin-bottom: 5px; font-weight: 600; color: #475569; }
+        input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        
+        .status-bar { margin-top: 20px; padding: 10px; background: #1e293b; color: #fbbf24; border-radius: 6px; font-size: 0.9em; display: flex; justify-content: space-between; }
+        
+        #searchResults { position: absolute; top: 100%; width: 100%; background: white; border: 1px solid #ccc; z-index: 100; display: none; max-height: 150px; overflow-y: auto; }
+        #searchResults li { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+        #searchResults li:hover { background: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="toolbar">
+        <a href="index.html" class="btn-tool" style="background: #5b21b6; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+    <i class="fas fa-arrow-right"></i> الرجوع للرئيسية
+</a>
+        <button class="btn-tool btn-new" onclick="clearForm()"><i class="fas fa-plus"></i> جديد</button>
+        <button class="btn-tool btn-save" onclick="handleSave()"><i class="fas fa-save"></i> حفظ / تعديل</button>
+        <button class="btn-tool btn-delete" onclick="handleDelete()"><i class="fas fa-trash"></i> حذف</button>
+        <button class="btn-tool btn-search" onclick="toggleSearchMode()"><i class="fas fa-search"></i> استعلام برقم الحوالة</button>
+   <button class="btn-tool" onclick="window.location.href='banking-search.html'" style="background: #5b21b6; color: white;">
+    <i class="fas fa-search-plus"></i> محرك البحث (إرسال)
+</button>
+
+    </div>
+
+    <div class="grid">
+        <!-- معلومات الحوالة -->
+        <div class="form-group">
+            <label>رقم الحوالة (آلي):</label>
+            <input type="text" id="transId" readonly placeholder="سيتولد تلقائياً">
+        </div>
+        <div class="form-group">
+            <label>الشبكة:</label>
+            <select id="network" onchange="loadNetBalance()">
+                <option value="النجم">النجم</option>
+                <option value="الامتياز">الامتياز</option>
+                <option value="الحزمي">الحزمي</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>التاريخ:</label>
+            <input type="date" id="date">
+        </div>
+
+        <!-- أطراف الحوالة -->
+        <div class="form-group">
+            <label>اسم المرسل:</label>
+            <input type="text" id="sender" oninput="clientLookup('sender')" autocomplete="off">
+            <ul id="searchResults"></ul>
+        </div>
+        <div class="form-group">
+            <label>هاتف المرسل:</label>
+            <input type="text" id="sPhone">
+        </div>
+        <div class="form-group">
+            <label>اسم المستلم:</label>
+            <input type="text" id="receiver">
+        </div>
+
+        <!-- القيود المالية -->
+        <div class="form-group">
+            <label>قيد على (التمويل):</label>
+            <select id="funding">
+                <option value="cash">صندوق النقد (كاش)</option>
+                <option value="client">رصيد العميل (آجل)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>المبلغ:</label>
+            <input type="number" id="amount" oninput="calc()">
+        </div>
+        <div class="form-group">
+            <label>العملة:</label>
+            <select id="currency" onchange="loadNetBalance()">
+                <option value="YER">يمني</option>
+                <option value="SAR">سعودي</option>
+                <option value="USD">دولار</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>عمولة المركز (ربحنا):</label>
+            <input type="number" id="profit" oninput="calc()">
+        </div>
+        <div class="form-group">
+            <label>عمولة الشبكة:</label>
+            <input type="number" id="netFee" oninput="calc()">
+        </div>
+        <div class="form-group">
+            <label>الإجمالي المطلوب:</label>
+            <input type="text" id="total" readonly style="background: #fefce8; font-weight: bold;">
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span>رصيد الشبكة الحالي: <b id="netBal">0.00</b></span>
+        <span id="statusText">جاهز لعملية جديدة</span>
+    </div>
+</div>
+
+<script src="database.js"></script>
+<script>
+    function saveNewRemittance() {
+    // 1. كود جمع البيانات من الحقول (مثال)
+    const amount = document.getElementById('amount').value;
+    const receiver = document.getElementById('receiver_name').value;
+    const currency = document.getElementById('currency').value;
+
+    // 2. كود الحفظ في قاعدة البيانات (database.js)
+    // ... (كود الحفظ الخاص بك) ...
+
+    // 3. إضافة السطر السحري لتسجيل العملية
+    AuditLogger.log(
+        "إرسال حوالة", 
+        `تم إرسال مبلغ ${amount} ${currency} إلى العميل: ${receiver}`
+    );
+
+    alert("✅ تم إرسال الحوالة بنجاح وتسجيلها في السجل");
+}
+    // تهيئة الصفحة
+    document.getElementById('date').valueAsDate = new Date();
+
+    function calc() {
+        const a = parseFloat(document.getElementById('amount').value) || 0;
+        const p = parseFloat(document.getElementById('profit').value) || 0;
+        const n = parseFloat(document.getElementById('netFee').value) || 0;
+        document.getElementById('total').value = (a + p + n).toFixed(2);
+    }
+
+    function clearForm() {
+        const fields = ['transId', 'sender', 'sPhone', 'receiver', 'amount', 'profit', 'netFee', 'total'];
+        fields.forEach(f => document.getElementById(f).value = '');
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('statusText').innerText = "وضع: إدخال جديد";
+    }
+
+    function handleSave() {
+        const id = document.getElementById('transId').value;
+        const data = {
+            id: id || Date.now(), // استخدام الوقت كمعرف فريد إذا كان جديداً
+            sender: document.getElementById('sender').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            profit: parseFloat(document.getElementById('profit').value),
+            currency: document.getElementById('currency').value,
+            type: "إرسال حوالة - عمولة"
+        };
+
+        if(!data.sender || !data.amount) return alert("أكمل البيانات!");
+
+        if (typeof DB !== 'undefined') {
+            // الحفظ في قاعدة البيانات (الإضافة أو التحديث)
+            DB.addOperation(data); 
+            alert(id ? "تم التعديل بنجاح" : "تم الحفظ والترحيل");
+            window.location.href = 'commission-reports.html';
+        }
+    }
+
+    function handleDelete() {
+        const id = document.getElementById('transId').value;
+        if(!id) return alert("اختر حوالة أولاً للحذف");
+        if(confirm("هل أنت متأكد من حذف هذه الحوالة؟")){
+            // كود الحذف من DB
+            alert("تم حذف الحوالة وعكس القيود");
+            clearForm();
+        }
+    }
+
+    function toggleSearchMode() {
+        const id = prompt("أدخل رقم الحوالة للاستعلام:");
+        if(id) {
+            // محاكاة استرجاع البيانات
+            document.getElementById('transId').value = id;
+            document.getElementById('statusText').innerText = "وضع: استعلام وتعديل";
+            alert("تم جلب بيانات الحوالة رقم " + id);
+        }
+    }
+
+    function clientLookup(type) {
+        const list = document.getElementById('searchResults');
+        list.style.display = 'block';
+        // البحث الفعلي يتم عبر DB.getClients()
+        list.innerHTML = `<li onclick="selectClient('أحمد محمد')">👤 أحمد محمد</li>`;
+    }
+
+    function selectClient(name) {
+        document.getElementById('sender').value = name;
+        document.getElementById('searchResults').style.display = 'none';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>كشف حساب الصناديق | إتقان برو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --main-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --accent-color: #f59e0b; 
+            --bg-gray: #f1f5f9;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-gray); margin: 0; padding: 20px; }
+        
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        .header { background: var(--main-gradient); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .selector-section { padding: 20px; background: #fff; border-bottom: 2px solid #f1f5f9; display: flex; gap: 10px; align-items: center; }
+        
+        .back-box-container { margin-bottom: 15px; }
+        .square-back-btn { text-decoration: none; color: #1e293b; display: inline-flex; align-items: center; gap: 10px; font-weight: bold; background: white; padding: 10px 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        select { padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; flex: 1; font-size: 14px; font-weight: bold; cursor: pointer; }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-view { background: var(--accent-color); color: white; }
+        .btn-print { background: #475569; color: white; } /* زر الطباعة */
+
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px; background: #f8fafc; }
+        .stat-card { padding: 20px; border-radius: 12px; background: white; border: 1px solid #e2e8f0; text-align: center; }
+        .stat-card h4 { margin: 0 0 10px; font-size: 13px; color: #64748b; }
+        .stat-card p { margin: 0; font-size: 20px; font-weight: 800; }
+        
+        .in-flow { color: #10b981; } 
+        .out-flow { color: #ef4444; } 
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 15px; text-align: right; border-bottom: 2px solid #edf2f7; font-size: 13px; color: #64748b; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        
+        .row-in { background-color: rgba(16, 185, 129, 0.05); }
+        .row-out { background-color: rgba(239, 68, 68, 0.05); }
+
+        /* --- إعدادات الطباعة --- */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; max-width: 100%; width: 100%; border-radius: 0; }
+            .selector-section, .back-box-container, .btn-print, .btn-view { display: none !important; } /* إخفاء الأزرار عند الطباعة */
+            .header { background: #eee !important; color: black !important; border-bottom: 2px solid #000; }
+            .stat-card { border: 1px solid #ccc; }
+            th { background: #f0f0f0 !important; color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="back-box-container">
+    <a href="index.html" class="square-back-btn">
+        <i class="fas fa-th-large"></i>
+        <span>القائمة الرئيسية</span>
+    </a>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fas fa-vault"></i> كشف حركة الصندوق</h2>
+        <div id="currentDate" style="font-size: 13px; opacity: 0.8;"></div>
+    </div>
+
+    <div class="selector-section">
+        <label style="font-weight: bold;">العملة:</label>
+        <select id="box-select" onchange="displayBoxMovement()">
+            <option value="YER">الريال اليمني (YER)</option>
+            <option value="SAR">الريال السعودي (SAR)</option>
+            <option value="USD">الدولار الأمريكي (USD)</option>
+        </select>
+        <button class="btn btn-view" onclick="displayBoxMovement()">
+            <i class="fas fa-sync"></i> تحديث
+        </button>
+        <!-- زر الطباعة المضاف -->
+        <button class="btn btn-print" onclick="window.print()">
+            <i class="fas fa-print"></i> طباعة الكشف
+        </button>
+    </div>
+
+    <div class="summary-grid">
+        <div class="stat-card"><h4>إجمالي المقبوضات</h4><p id="total-in" class="in-flow">0.00</p></div>
+        <div class="stat-card"><h4>إجمالي المدفوعات</h4><p id="total-out" class="out-flow">0.00</p></div>
+        <div class="stat-card" style="background: #fffbeb;">
+            <h4>الرصيد الحالي</h4><p id="current-balance" style="color: #b45309;">0.00</p>
+        </div>
+    </div>
+
+    <table id="fundTable">
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>نوع العملية</th>
+                <th>العميل</th>
+                <th>وارد (قبض)</th>
+                <th>منصرف (صرف)</th>
+                <th>البيان</th>
+            </tr>
+        </thead>
+        <tbody id="box-movement-table"></tbody>
+    </table>
+</div>
+
+<script src="database.js"></script>
+<script>
+    document.getElementById('currentDate').innerText = "تاريخ التقرير: " + new Date().toLocaleDateString('ar-YE');
+    window.onload = function() {
+        if(typeof displayBoxMovement === 'function') displayBoxMovement();
+    };
+    // دالة عرض حركة الصندوق في الجدول
+function displayBoxMovement() {
+    const selectEl = document.getElementById('box-select'); 
+    if (!selectEl) return;
+    
+    const selectedCurrency = selectEl.value; 
+    // استدعاء الدالة التي أضفناها في database.js أعلاه
+    const filteredOps = DB.getBoxMovement(selectedCurrency); 
+    
+    const tableBody = document.getElementById('box-movement-table');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = ''; 
+    let totalIn = 0;  
+    let totalOut = 0; 
+
+    filteredOps.forEach(op => {
+        // تحديد نوع العملية (وارد أو صادر) بناءً على مسمى النوع
+        const isEntry = op.type.includes('قبض') || op.type.includes('وارد') || op.type.includes('دائن') || op.type.includes('افتتاحي');
+        const amount = Math.abs(op.amount);
+
+        if(isEntry) {
+            totalIn += amount;
+        } else {
+            totalOut += amount;
+        }
+
+        const row = `
+            <tr class="${isEntry ? 'row-in' : 'row-out'}">
+                <td>${new Date(op.date).toLocaleString('ar-YE')}</td>
+                <td><span class="badge">${op.type}</span></td>
+                <td>${op.client}</td>
+                <td style="color: green; font-weight: bold;">${isEntry ? amount.toLocaleString() : '-'}</td>
+                <td style="color: red; font-weight: bold;">${!isEntry ? amount.toLocaleString() : '-'}</td>
+                <td>${op.notes || '-'}</td>
+            </tr>`;
+        tableBody.insertAdjacentHTML('beforeend', row);
+    });
+
+    // تحديث الأرصدة في حقول العرض
+    if(document.getElementById('total-in')) document.getElementById('total-in').innerText = totalIn.toLocaleString();
+    if(document.getElementById('total-out')) document.getElementById('total-out').innerText = totalOut.toLocaleString();
+    if(document.getElementById('current-balance')) document.getElementById('current-balance').innerText = (totalIn - totalOut).toLocaleString();
+}
+</script>
+
+
+</body>
+</html>

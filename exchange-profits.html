@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>أرباح المصارفة | إتقان برو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --bg: #f1f5f9; --primary: #1e293b; --accent: #0284c7; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .header-box { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .header-box h2 { color: var(--primary); margin: 0; }
+
+        /* كروت الإجماليات */
+        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .card { padding: 15px; border-radius: 8px; color: white; text-align: center; }
+        .card-yer { background: #059669; } /* أخضر لليمني */
+        .card-sar { background: #d97706; } /* برتقالي للسعودي */
+        .card-usd { background: #2563eb; } /* أزرق للدولار */
+        .card h3 { margin: 5px 0; font-size: 0.9em; opacity: 0.9; }
+        .card b { font-size: 1.5em; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        thead th { background: var(--primary); color: white; padding: 12px; font-size: 0.9em; }
+        tbody td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; font-size: 0.9em; }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        
+        .profit-val { color: #059669; font-weight: bold; }
+        .loss-val { color: #dc2626; font-weight: bold; }
+        
+        .btn-home { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2><i class="fas fa-chart-line"></i> تقرير أرباح المصارفة (صرف العملات)</h2>
+        <a href="index.html" class="btn-home"><i class="fas fa-home"></i> الرئيسية</a>
+    </div>
+
+    <!-- كروت ملخص الأرباح حسب العملة -->
+    <div class="summary-cards">
+        <div class="card card-yer">
+            <h3>أرباح الريال اليمني</h3>
+            <b id="totalYer">0.00</b>
+        </div>
+        <div class="card card-sar">
+            <h3>أرباح الريال السعودي</h3>
+            <b id="totalSar">0.00</b>
+        </div>
+        <div class="card card-usd">
+            <h3>أرباح الدولار الأمريكي</h3>
+            <b id="totalUsd">0.00</b>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>نوع العملية</th>
+                <th>البيان</th>
+                <th>المبلغ المحول</th>
+                <th>سعر الصرف</th>
+                <th>المبلغ المقابل</th>
+                <th>صافي الربح</th>
+            </tr>
+        </thead>
+        <tbody id="profitTableBody">
+            <!-- سيتم تعبئة البيانات برمجياً -->
+        </tbody>
+    </table>
+</div>
+
+<script src="database.js"></script>
+<script>
+    function loadExchangeProfits() {
+        const tbody = document.getElementById('profitTableBody');
+        const allOps = (typeof DB !== 'undefined') ? DB.getOperations() : [];
+        
+        // تصفية عمليات "المصارفة" أو "صرف العملات" فقط
+        const exchangeOps = allOps.filter(op => op.type && op.type.includes("مصارفة") || op.type.includes("صرف"));
+
+        let yerProfit = 0, sarProfit = 0, usdProfit = 0;
+        tbody.innerHTML = "";
+
+        exchangeOps.forEach(op => {
+            const tr = document.createElement('tr');
+            
+            // حساب الربح (افتراض أن الربح مخزن في حقل op.profit)
+            const profit = parseFloat(op.profit || 0);
+            
+            // تجميع الأرباح حسب العملة
+            if(op.currency === 'YER') yerProfit += profit;
+            else if(op.currency === 'SAR') sarProfit += profit;
+            else if(op.currency === 'USD') usdProfit += profit;
+
+            tr.innerHTML = `
+                <td>${op.date ? op.date.split('T')[0] : '---'}</td>
+                <td>${op.type}</td>
+                <td style="text-align: right;">${op.notes || 'عملية مصارفة'}</td>
+                <td>${parseFloat(op.amount).toLocaleString()}</td>
+                <td>${op.rate || '1.00'}</td>
+                <td>${(op.amount * (op.rate || 1)).toLocaleString()}</td>
+                <td class="${profit >= 0 ? 'profit-val' : 'loss-val'}">${profit.toLocaleString()} ${op.currency}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // تحديث الكروت العلوية
+        document.getElementById('totalYer').innerText = yerProfit.toLocaleString();
+        document.getElementById('totalSar').innerText = sarProfit.toLocaleString();
+        document.getElementById('totalUsd').innerText = usdProfit.toLocaleString();
+    }
+
+    window.onload = loadExchangeProfits;
+</script>
+
+</body>
+</html>

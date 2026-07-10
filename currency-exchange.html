@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script>
+    if (!sessionStorage.getItem('isLoggedIn')) {
+        window.location.href = 'login.html';
+    }
+</script>
+    <meta charset="UTF-8">
+    <title>المصارفة والتحويل | إتقان برو</title>
+    <div class="back-box-container">
+    <a href="index.html" class="square-back-btn">
+        <i class="fas fa-th-large"></i>
+        <span>القائمة الرئيسية</span>
+    </a>
+</div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --main-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --accent-color: #10b981; /* أخضر مالي */
+            --bg-gray: #020911;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-gray); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: rgb(165, 160, 160); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: var(--main-gradient); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .exchange-card { padding: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .full-width { grid-column: span 2; }
+
+        fieldset { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 10px; }
+        legend { font-weight: bold; color: #1e293b; padding: 0 10px; font-size: 14px; }
+
+        label { display: block; font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; transition: 0.3s; box-sizing: border-box; }
+        input:focus { border-color: var(--accent-color); outline: none; }
+
+        .calc-box { background: #ecfdf5; border: 1px dashed #10b981; padding: 20px; border-radius: 12px; text-align: center; grid-column: span 2; }
+        .calc-box h3 { margin: 0; color: #065f46; font-size: 24px; }
+        
+        .toolbar { padding: 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; }
+        .btn-save { background: var(--accent-color); color: white; border: none; padding: 15px 50px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; font-size: 16px; }
+        .btn-save:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fas fa-sync-alt"></i> شاشة المصارفة والتحويل</h2>
+        <span id="curDate"></span>
+    </div>
+
+    <form id="exchangeForm" class="exchange-card">
+        <div class="full-width">
+            <label>الحساب (عميل / شركة صرافة / صندوق)</label>
+            <select id="acc_name" required>
+                <option value="">-- اختر الحساب المراد مصارفته --</option>
+            </select>
+        </div>
+
+        <fieldset>
+            <legend>العملة المباعة (منه)</legend>
+            <label>العملة</label>
+            <select id="from_cur" onchange="calculateExchange()">
+                <option value="صندوق الريال السعودي">ريال سعودي</option>
+                <option value="صندوق الدولار الأمريكي">دولار أمريكي</option>
+                <option value="صندوق الريال اليمني">ريال يمني</option>
+            </select>
+            <label style="margin-top:15px;">المبلغ</label>
+            <input type="number" id="from_amount" step="0.01" value="0" oninput="calculateExchange()">
+        </fieldset>
+
+        <fieldset>
+            <legend>العملة المشتراة (إليه)</legend>
+            <label>العملة</label>
+            <select id="to_cur" onchange="calculateExchange()">
+                <option value="صندوق الريال اليمني">ريال يمني</option>
+                <option value="صندوق الريال السعودي">ريال سعودي</option>
+                <option value="صندوق الدولار الأمريكي">دولار أمريكي</option>
+            </select>
+            <label style="margin-top:15px;">سعر الصرف</label>
+            <input type="number" id="ex_rate" step="0.001" value="0" oninput="calculateExchange()">
+        </fieldset>
+
+        <div class="calc-box">
+            <label>المبلغ المستحق (الناتج)</label>
+            <h3 id="result_display">0.00</h3>
+        </div>
+
+        <div class="full-width">
+            <label>ملاحظات العملية</label>
+            <input type="text" id="ex_notes" placeholder="مثلاً: مصارفة رصيد شركة النجم...">
+        </div>
+
+        <div class="toolbar full-width">
+            <button type="submit" class="btn-save">
+                <i class="fas fa-check-double"></i> تنفيذ عملية المصارفة
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="database.js"></script>
+<script>
+    document.getElementById('curDate').innerText = new Date().toLocaleDateString('ar-YE');
+
+    window.onload = () => {
+        const accSelect = document.getElementById('acc_name');
+        // جلب العملاء والشركات
+        const clients = DB.getClients();
+        clients.forEach(c => {
+            let opt = document.createElement('option');
+            opt.value = c.name;
+            opt.text = (c.name.includes('النجم') || c.name.includes('المميز')) ? "🏢 " + c.name : "👤 " + c.name;
+            accSelect.appendChild(opt);
+        });
+    };
+
+    function calculateExchange() {
+        const amount = parseFloat(document.getElementById('from_amount').value) || 0;
+        const rate = parseFloat(document.getElementById('ex_rate').value) || 0;
+        const result = amount * rate;
+        document.getElementById('result_display').innerText = result.toLocaleString('en-US', {minimumFractionDigits: 2});
+        return result;
+    }
+
+    document.getElementById('exchangeForm').onsubmit = function(e) {
+        e.preventDefault();
+        const result = calculateExchange();
+        
+        const exchangeData = {
+            date: new Date().toLocaleDateString('en-CA'),
+            account: document.getElementById('acc_name').value,
+            fromCurrency: document.getElementById('from_cur').value,
+            fromAmount: parseFloat(document.getElementById('from_amount').value),
+            toCurrency: document.getElementById('to_cur').value,
+            toAmount: result,
+            rate: document.getElementById('ex_rate').value
+        };
+
+        if(exchangeData.fromCurrency === exchangeData.toCurrency) {
+            alert("❌ لا يمكن المصارفة لنفس العملة!");
+            return;
+        }
+
+        DB.addExchange(exchangeData);
+        alert("✅ تمت عملية المصارفة بنجاح!");
+        window.location.reload();
+    };
+</script>
+</body>
+</html>

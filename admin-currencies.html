@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ترميز العملات | إتقان برو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container { max-width: 800px; margin: 40px auto; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header i { font-size: 1.5rem; color: var(--primary); }
+
+        .card-body { padding: 25px; }
+
+        .currency-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            align-items: flex-end;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+        
+        input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid var(--border-color); }
+        th { background: #f8fafc; color: #64748b; font-size: 0.9rem; }
+
+        .btn-delete { color: #ef4444; border: none; background: none; cursor: pointer; }
+        .back-link { display: block; text-align: center; margin-top: 20px; text-decoration: none; color: var(--primary); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-money-bill-transfer"></i>
+            <h3>إدارة وترميز العملات</h3>
+        </div>
+        <div class="card-body">
+            <!-- نموذج إضافة عملة -->
+            <div class="currency-form">
+                <div class="form-group">
+                    <label>اسم العملة</label>
+                    <input type="text" id="cur_name" placeholder="مثلاً: ريال قطري">
+                </div>
+                <div class="form-group">
+                    <label>الرمز (3 حروف)</label>
+                    <input type="text" id="cur_symbol" placeholder="QAR">
+                </div>
+                <div class="form-group">
+                    <label>سعر الصرف الافتراضي</label>
+                    <input type="number" id="cur_rate" placeholder="1.00">
+                </div>
+                <button class="btn-add" onclick="addNewCurrency()">إضافة</button>
+            </div>
+
+            <!-- جدول العملات -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>العملة</th>
+                        <th>الرمز</th>
+                        <th>سعر الصرف الأساسي</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="currency_table_body">
+                    <!-- سيتم تعبئتها من النظام -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a href="system-admin.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للإدارة</a>
+</div>
+
+<script src="database.js"></script>
+<script>
+    window.onload = refreshCurrencyTable;
+
+    function refreshCurrencyTable() {
+        const tbody = document.getElementById('currency_table_body');
+        // جلب العملات من database.js (تأكد من وجود دالة getCurrencies)
+        const currencies = DB.getCurrencies ? DB.getCurrencies() : [
+            {name: 'ريال يمني', symbol: 'YER', rate: 1},
+            {name: 'ريال سعودي', symbol: 'SAR', rate: 140},
+            {name: 'دولار أمريكي', symbol: 'USD', rate: 530}
+        ]; 
+
+        tbody.innerHTML = '';
+        currencies.forEach(cur => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${cur.name}</strong></td>
+                    <td>${cur.symbol}</td>
+                    <td>${cur.rate}</td>
+                    <td>
+                        ${['YER', 'SAR', 'USD'].includes(cur.symbol) ? 
+                        '<small style="color:#94a3b8">أساسية</small>' : 
+                        `<button class="btn-delete" onclick="deleteCurrency('${cur.symbol}')"><i class="fas fa-trash"></i></button>`}
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function addNewCurrency() {
+        const name = document.getElementById('cur_name').value;
+        const symbol = document.getElementById('cur_symbol').value;
+        const rate = document.getElementById('cur_rate').value;
+
+        if(!name || !symbol || !rate) return alert("يرجى إكمال الحقول");
+
+        const newCur = { name, symbol: symbol.toUpperCase(), rate: parseFloat(rate) };
+        
+        if(DB.addCurrency) {
+            DB.addCurrency(newCur);
+            refreshCurrencyTable();
+            alert("✅ تمت إضافة العملة بنجاح");
+        }
+    }
+</script>
+
+</body>
+</html>

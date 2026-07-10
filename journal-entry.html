@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script>
+    if (!sessionStorage.getItem('isLoggedIn')) {
+        window.location.href = 'login.html';
+    }
+</script>
+    <meta charset="UTF-8">
+    <title>إدخال قيد مزدوج احترافي | إتقان برو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary-bg: #0f172a;
+            --card-bg: #ffffff;
+            --main-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --input-border: #e2e8f0;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0; 
+            padding: 40px 20px;
+            color: var(--text-main);
+        }
+
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        /* رأس الصفحة */
+        .header { 
+            background: var(--main-gradient); 
+            color: white; 
+            padding: 30px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            position: relative;
+        }
+        
+        .header h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .header #dateDisplay { opacity: 0.8; font-size: 14px; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; }
+
+        .entry-form { padding: 40px; }
+
+        /* قسم التفاصيل العلوية */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        .form-group label { 
+            display: block; 
+            font-weight: 600; 
+            font-size: 13px; 
+            color: var(--text-muted); 
+            margin-bottom: 8px;
+        }
+
+        /* أزرار العملات الاحترافية */
+        .currency-selector { display: flex; gap: 8px; }
+        .curr-btn { 
+            flex: 1; 
+            padding: 12px; 
+            border: 2px solid var(--input-border); 
+            border-radius: 12px; 
+            cursor: pointer; 
+            background: white; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .curr-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .curr-btn.active { 
+            background: var(--accent-color); 
+            color: white; 
+            border-color: var(--accent-color); 
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* الجدول */
+        .entry-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-bottom: 20px; }
+        .entry-table th { padding: 15px; text-align: right; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .entry-table td { 
+            padding: 15px; 
+            background: #ffffff; 
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .entry-table tr td:first-child { border-right: 1px solid #f1f5f9; border-radius: 0 12px 12px 0; }
+        .entry-table tr td:last-child { border-left: 1px solid #f1f5f9; border-radius: 12px 0 0 12px; }
+
+        select, input, textarea { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid var(--input-border); 
+            border-radius: 12px; 
+            font-size: 14px; 
+            transition: all 0.3s; 
+            box-sizing: border-box; 
+            background: #fff;
+        }
+        select:focus, input:focus, textarea:focus { 
+            border-color: var(--accent-color); 
+            outline: none; 
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); 
+            transform: translateY(-1px);
+        }
+
+        /* تذييل الميزانية */
+        .balance-footer { 
+            background: var(--primary-bg); 
+            padding: 25px; 
+            border-radius: 18px; 
+            display: flex; 
+            justify-content: space-around; 
+            margin-top: 30px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+        }
+        .stat-item label { opacity: 0.6; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .stat-item span { font-size: 22px; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
+
+        /* شريط الأدوات */
+        .toolbar { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #fafafa; }
+        
+        .btn-save { 
+            background: var(--success-color); 
+            color: white; 
+            width: 100%; 
+            max-width: 400px;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+        }
+        .btn-save:hover:not(:disabled) { background: #059669; transform: translateY(-3px); box-shadow: 0 12px 25px rgba(16, 185, 129, 0.3); }
+        .btn-save:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+        
+        .back-link { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 600; transition: 0.3s; }
+        .back-link:hover { color: var(--accent-color); }
+
+        /* التنبيهات */
+        .alert { 
+            padding: 20px; 
+            border-radius: 16px; 
+            margin: 20px 40px 0 40px; 
+            display: none; 
+            text-align: center; 
+            font-weight: 600;
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; display: block; }
+
+        input[readonly] { background: #f8fafc; border-style: dashed; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fas fa-file-invoice-dollar" style="margin-left: 10px;"></i> قيد يومية مزدوج احترافي</h2>
+        <div id="dateDisplay"></div>
+    </div>
+
+    <div id="msg" class="alert">🚀 تم ترحيل القيد بنجاح وتحديث أرصدة الحسابات!</div>
+
+    <form id="journalForm" class="entry-form" onsubmit="submitEntry(event)">
+        
+        <div class="details-grid">
+            <div class="form-group">
+                <label>تاريخ العملية</label>
+                <input type="date" id="entryDate" required>
+            </div>
+            <div class="form-group">
+                <label>عملة القيد</label>
+                <div class="currency-selector">
+                    <button type="button" class="curr-btn active" onclick="setCurr('YER', this)">YER</button>
+                    <button type="button" class="curr-btn" onclick="setCurr('SAR', this)">SAR</button>
+                    <button type="button" class="curr-btn" onclick="setCurr('USD', this)">USD</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <label style="font-weight: 600; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: block;">البيان العام / ملاحظات القيد</label>
+            <textarea id="main_notes" rows="2" placeholder="اشرح تفاصيل العملية هنا لسهولة المراجعة لاحقاً..." required></textarea>
+        </div>
+
+        <table class="entry-table">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">الحساب المتأثر</th>
+                    <th>مدين (منه)</th>
+                    <th>دائن (له)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- الطرف المدين -->
+                <tr>
+                    <td>
+                        <select id="acc_1" required onchange="calculateTotals()">
+                            <option value="">-- اختر الحساب المدين --</option>
+                        </select>
+                    </td>
+                    <td><input type="number" id="debit_1" step="0.01" value="0" oninput="calculateTotals()" placeholder="0.00"></td>
+                    <td><input type="number" value="0" readonly></td>
+                </tr>
+                <!-- الطرف الدائن -->
+                <tr>
+                    <td>
+                        <select id="acc_2" required onchange="calculateTotals()">
+                            <option value="">-- اختر الحساب الدائن --</option>
+                        </select>
+                    </td>
+                    <td><input type="number" value="0" readonly></td>
+                    <td><input type="number" id="credit_2" step="0.01" value="0" oninput="calculateTotals()" placeholder="0.00"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="balance-footer">
+            <div class="stat-item">
+                <label>إجمالي المدين</label>
+                <span id="total_debit">0.00</span>
+            </div>
+            <div class="stat-item">
+                <label>إجمالي الدائن</label>
+                <span id="total_credit">0.00</span>
+            </div>
+            <div class="stat-item">
+                <label>توازن القيد</label>
+                <span id="status_text" style="color: var(--danger-color);">غير متزن</span>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button type="submit" id="saveBtn" class="btn-save" disabled>
+                <i class="fas fa-check-circle"></i> ترحيل وحفظ القيد المزدوج
+            </button>
+            <a href="index.html" class="back-link"><i class="fas fa-chevron-right"></i> العودة لشاشة التحكم الرئيسية</a>
+        </div>
+    </form>
+</div>
+
+<script src="database.js"></script>
+<script>
+    let selectedCurrency = 'YER';
+
+    window.onload = () => {
+        document.getElementById('entryDate').valueAsDate = new Date();
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('ar-YE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        loadAccounts();
+    };
+
+    function loadAccounts() {
+        const clients = DB.getClients();
+        const funds = ['صندوق الريال اليمني', 'صندوق الريال السعودي', 'صندوق الدولار الأمريكي'];
+        const selects = [document.getElementById('acc_1'), document.getElementById('acc_2')];
+        
+        selects.forEach(sel => {
+            sel.innerHTML = '<option value="">-- ابحث عن حساب... --</option>';
+            funds.forEach(f => {
+                let opt = document.createElement('option');
+                opt.value = f;
+                opt.text = "📦 " + f;
+                sel.appendChild(opt);
+            });
+            clients.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c.name;
+                opt.text = "👤 " + c.name;
+                sel.appendChild(opt);
+            });
+        });
+    }
+
+    function setCurr(curr, btn) {
+        selectedCurrency = curr;
+        document.querySelectorAll('.curr-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        calculateTotals();
+    }
+
+    function calculateTotals() {
+        const d1 = parseFloat(document.getElementById('debit_1').value) || 0;
+        const c2 = parseFloat(document.getElementById('credit_2').value) || 0;
+        const acc1 = document.getElementById('acc_1').value;
+        const acc2 = document.getElementById('acc_2').value;
+
+        document.getElementById('total_debit').innerText = d1.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('total_credit').innerText = c2.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        const saveBtn = document.getElementById('saveBtn');
+        const statusText = document.getElementById('status_text');
+
+        if (d1 > 0 && d1 === c2 && acc1 && acc2 && acc1 !== acc2) {
+            saveBtn.disabled = false;
+            statusText.innerText = "متزن ومكتمل";
+            statusText.style.color = "var(--success-color)";
+        } else {
+            saveBtn.disabled = true;
+            if (acc1 === acc2 && acc1 !== "") {
+                statusText.innerText = "خطأ: تكرار الحساب";
+            } else {
+                statusText.innerText = "غير متزن";
+            }
+            statusText.style.color = "var(--danger-color)";
+        }
+    }
+
+    function submitEntry(e) {
+        e.preventDefault();
+        
+        const entryData = {
+            date: document.getElementById('entryDate').value,
+            fromAccount: document.getElementById('acc_1').value,
+            toAccount: document.getElementById('acc_2').value,
+            amount: parseFloat(document.getElementById('debit_1').value),
+            currency: selectedCurrency,
+            notes: document.getElementById('main_notes').value
+        };
+
+        if (DB.saveDoubleEntry(entryData)) {
+            const msg = document.getElementById('msg');
+            msg.style.display = 'block';
+            msg.className = 'alert success';
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            alert("⚠️ فشل الترحيل: تأكد من ملف database.js");
+        }
+    }
+</script>
+</body>
+</html>

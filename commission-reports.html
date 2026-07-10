@@ -1,0 +1,215 @@
+<main class="main-content">
+    <!-- زر الرجوع المطور -->
+    <a href="index.html" class="btn-back-styled">
+        <i class="fas fa-arrow-right"></i> الرجوع للرئيسية
+    </a>
+
+    <div class="top-nav" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <h3><i class="fas fa-chart-line"></i> سجل أرباح العمولات التفصيلي</h3>
+        
+        <!-- شريط الفلاتر التفاعلي -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <!-- فلتر العملة الجديد -->
+            <select id="filterCurrency" onchange="loadProfitReport()" style="padding: 8px; border-radius: 8px; border: 1px solid #3b82f6; background: #eff6ff; font-weight: bold;">
+                <option value="all">كل العملات</option>
+                <option value="YER">الريال اليمني (YER)</option>
+                <option value="SAR">الريال السعودي (SAR)</option>
+                <option value="USD">الدولار الأمريكي (USD)</option>
+            </select>
+
+            <!-- فلتر الشبكة -->
+            <select id="filterNetwork" onchange="loadProfitReport()" style="padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                <option value="all">كل الشبكات</option>
+                <option value="النجم">النجم</option>
+                <option value="الامتياز">الامتياز</option>
+                <option value="الحزمي">الحزمي</option>
+            </select>
+
+            <!-- فلتر التاريخ من - إلى -->
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <label style="font-size: 12px; color: #64748b;">من:</label>
+                <input type="date" id="dateFrom" onchange="loadProfitReport()" style="padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px;">
+                
+                <label style="font-size: 12px; color: #64748b;">إلى:</label>
+                <input type="date" id="dateTo" onchange="loadProfitReport()" style="padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px;">
+            </div>
+
+            <button onclick="resetFilters()" style="padding: 8px 15px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-undo"></i> إعادة ضبط
+            </button>
+        </div>
+    </div>
+
+    <!-- كرت إجمالي ديناميكي واحد يتغير لونه وشكله حسب العملة المختارة -->
+    <div id="profitDisplayCard" style="background: #10b981; color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div id="currencyLabel" style="font-size: 16px; opacity: 0.9;">إجمالي الأرباح المختارة</div>
+                <h1 id="dynamicProfitValue" style="margin: 10px 0; font-size: 35px;">0</h1>
+            </div>
+            <i id="currencyIcon" class="fas fa-money-bill-wave" style="font-size: 40px; opacity: 0.3;"></i>
+        </div>
+    </div>
+
+    <!-- جدول عرض البيانات -->
+    <div class="form-card" style="max-width: 100%; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+            <thead>
+                <tr style="background: #f1f5f9; text-align: right;">
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">التاريخ</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">الشبكة</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">البيان</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">مبلغ الربح</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">العملة</th>
+                </tr>
+            </thead>
+            <tbody id="profitTableBody"></tbody>
+        </table>
+    </div>
+</main>
+<style>
+    .btn-back-styled {
+        text-decoration: none;
+        color: #3b82f6; /* اللون الأزرق الموحد في إتقان برو */
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        padding: 10px 20px;
+        border-radius: 10px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0; /* إضافة إطار خفيف ليتناسب مع كروت النظام */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+
+    .btn-back-styled i {
+        font-size: 16px;
+        transition: 0.3s;
+    }
+
+    .btn-back-styled:hover {
+        color: #1d4ed8;
+        background: #f0f9ff;
+        border-color: #3b82f6;
+        /* حركته لليمين قليلاً عند التمرير كونه نظام عربي */
+        transform: translateX(5px); 
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+
+    /* حركة سهم الرجوع عند التمرير */
+    .btn-back-styled:hover i {
+        transform: scale(1.2);
+    }
+</style>
+
+<!-- تأكد من وضع الزر في هذا المكان داخل الـ HTML -->
+<a href="index.html" class="btn-back-styled">
+    <i class="fas fa-arrow-right"></i> 
+    <span>الرجوع إلى لوحة التحكم</span>
+</a>
+<!-- 1. استدعاء قاعدة البيانات مرة واحدة فقط في البداية -->
+<script src="database.js"></script>
+
+<script>
+  function loadProfitReport() {
+    // التأكد من وجود الكائن DB ودالة جلب الأرباح
+    if (typeof DB === 'undefined') {
+        console.error("خطأ: ملف database.js غير محمل بشكل صحيح!");
+        return;
+    }
+
+    let profits = DB.getCommissionProfit() || []; 
+    console.log("البيانات المستلمة:", profits); // فحص البيانات في Console
+
+    const selectedCurrency = document.getElementById('filterCurrency').value;
+    const selectedNetwork = document.getElementById('filterNetwork').value;
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+
+    // 1. فلترة العملة والشبكة
+    if (selectedCurrency !== 'all') {
+        profits = profits.filter(p => p.currency === selectedCurrency);
+    }
+    if (selectedNetwork !== 'all') {
+        profits = profits.filter(p => p.client === selectedNetwork);
+    }
+
+    // 2. فلترة التاريخ
+    if (dateFrom) {
+        profits = profits.filter(p => p.date >= dateFrom);
+    }
+    if (dateTo) {
+        profits = profits.filter(p => p.date <= dateTo);
+    }
+
+    const tbody = document.getElementById('profitTableBody');
+    if (!tbody) return;
+
+    let totalValue = 0;
+
+    // 3. بناء الجدول
+    if (profits.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">لا توجد بيانات لهذه الفترة</td></tr>`;
+    } else {
+        tbody.innerHTML = profits.map(p => {
+            const amount = parseFloat(p.amount) || 0;
+            totalValue += amount;
+            return `
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;">${p.date}</td>
+                    <td style="padding: 12px;">${p.client}</td>
+                    <td style="padding: 12px;">${p.notes || '-'}</td>
+                    <td style="padding: 12px; color: #10b981; font-weight: bold;">${amount.toLocaleString()}</td>
+                    <td style="padding: 12px;">${p.currency}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    updateProfitCard(selectedCurrency, totalValue);
+    if (selectedNetwork !== 'all') {
+    profits = profits.filter(p => 
+        (p.client && p.client.includes(selectedNetwork)) || 
+        (p.notes && p.notes.includes(selectedNetwork))
+    );
+}
+}
+
+function resetFilters() {
+    document.getElementById('filterCurrency').value = 'all';
+    document.getElementById('filterNetwork').value = 'all';
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    loadProfitReport();
+}
+
+function updateProfitCard(currency, value) {
+    const card = document.getElementById('profitDisplayCard');
+    const label = document.getElementById('currencyLabel');
+    const displayValue = document.getElementById('dynamicProfitValue');
+    
+    if(!displayValue) return;
+    displayValue.innerText = value.toLocaleString();
+
+    if (currency === 'YER') {
+        card.style.background = '#10b981';
+        label.innerText = "إجمالي أرباح الريال اليمني";
+    } else if (currency === 'SAR') {
+        card.style.background = '#3b82f6';
+        label.innerText = "إجمالي أرباح الريال السعودي";
+    } else if (currency === 'USD') {
+        card.style.background = '#8b5cf6';
+        label.innerText = "إجمالي أرباح الدولار الأمريكي";
+    } else {
+        card.style.background = '#64748b';
+        label.innerText = "إجمالي أرباح جميع العملات (YER)";
+    }
+}
+
+// استخدام هذا التابع لضمان تحميل الصفحة بالكامل
+document.addEventListener('DOMContentLoaded', loadProfitReport);
+</script>
