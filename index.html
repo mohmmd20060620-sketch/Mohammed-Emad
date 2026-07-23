@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <head>
+        <title>Mohmad_emad ||الصفحة الرئيسية </title>
+    </head>
+    <body>
+        <h1>
+          <a href="المشاريع html العملي.html">مشاريع HTML العملي</a>
+          <br>
+          <br>
+          <a href="المشاريع html النظري.html">مشاريع HTML النظري</a>
+
+          
+
+
+          </h1> 
+    </body>
+    <script>
+// يوضع في أعلى ملف HTML أو JS الرئيسي
+window.addEventListener('load', () => {
+    const loggedIn = sessionStorage.getItem('isLoggedIn');
+    
+    if (!loggedIn) {
+        const user = prompt("اسم المستخدم:");
+        const pass = prompt("كلمة المرور:");
+        
+        // حدد اسم المستخدم وكلمة المرور الثابتة هنا
+        const ADMIN_USER = "admin";
+        const ADMIN_PASS = "7788";
+        
+        if (user === ADMIN_USER && pass === ADMIN_PASS) {
+            sessionStorage.setItem('isLoggedIn', 'true');
+        } else {
+            alert("بيانات الدخول غير صحيحة!");
+            location.reload(); // إعادة تحميل الصفحة لإعادة المحاولة
+        }
+    }
+});
+
+// تفعيل زر إضافة عميل
+document.getElementById('btn-add-client').onclick = function() {
+    window.location.href = 'manage-clients.html';
+};
+    </script>
+        </html>
