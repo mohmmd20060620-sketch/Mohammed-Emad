@@ -1,0 +1,93 @@
+h1{
+    color: brown;
+    font-size: 30px;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: chartreuse;
+    display: inline;
+    
+}
+
+
+h2{
+    color: blue;
+    font-size: 20px;
+
+}
+h3{
+    color: red;
+    font-size: 15px;
+
+}
+h4{
+    color: green;
+    font-size: 10px;
+
+}
+h5{
+    color: yellow;
+    font-size: 5px;
+
+}
+    h6{
+    color: aqua;
+    font-size: 2px; 
+    }
+
+    body{
+        background-color: lightgreen;
+
+    }
+    div{
+        border-style: double  ;
+        border-width: 20px;
+        background-color: khaki;
+        width: 500px;
+        height: 300px   ;
+
+       
+        border:2px solid blue;
+         /*تحديد الاستايل من حيث الاتجاه */
+        border-top-style:double ;
+         border-right-style:double ;
+           border-left-style:double ;
+            border-bottom-style:double ;
+
+             /*تحديد حجم العرض */
+             border-top-width:double ;
+         border-right-width:double ;
+           border-left-width:double ;
+            border-bottom-width:double ;
+           
+
+             /*تحديد لون الحدود */
+             border-top-color:double ;
+             border-right-color:double ;
+             border-left-color:double ;
+             border-bottom-color:double ;
+    
+    }
+    table{
+        border: 2px solid black;
+        background-color: lightblue;
+        width: 500px;
+        height: 300px   ;
+        border:2px solid blue;
+        border-collapse: collapse;
+
+    
+    }
+
+    table,td {
+        
+        border: 6px solid blueviolet;
+        width: 300px;
+        height: 30px;
+        outline: 1px double red;
+         outline-width: 5px;
+          outline-style: double;
+           outline-color: yellow;
+        
+
+    
+    }
+
